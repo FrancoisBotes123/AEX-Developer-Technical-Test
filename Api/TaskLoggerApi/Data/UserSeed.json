@@ -1,0 +1,26 @@
+[
+  {
+    "UserName": "Francois",
+    "DateOfBirth": "1956-07-22",
+    "Created": "2023-02-26",
+    "LastActive": "2024-06-05",
+    "Tasks": [],
+    "Groups": []
+  },
+  {
+    "UserName": "Jana",
+    "DateOfBirth": "1956-07-22",
+    "Created": "2023-02-26",
+    "LastActive": "2024-06-05",
+    "Tasks": [],
+    "Groups": []
+  },
+  {
+    "UserName": "Frederik",
+    "DateOfBirth": "1956-07-22",
+    "Created": "2023-02-26",
+    "LastActive": "2024-06-05",
+    "Tasks": [],
+    "Groups": []
+  }
+]
