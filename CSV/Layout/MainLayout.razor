@@ -1,0 +1,68 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@inherits LayoutComponentBase
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<style>
+    .unauthorized-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh; /* or use height if you want it to always be the full height of the viewport */
+        padding: 1rem; /* To ensure some spacing around the edges on small screens */
+    }
+
+    .login-card {
+        max-width: 400px; /* Adjust width as needed */
+        width: 100%; /* Makes sure it doesn't overflow on small screens */
+        margin: auto; /* Adds automatic margins on all sides */
+        padding: 1rem; /* Padding inside the card */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional: adds some shadow for better visibility */
+    }
+/* Adjust the selector as needed based on your login card's structure */
+.unauthorized-container .card {
+    margin: auto;
+}
+</style>
+
+<div class="page">
+    <AuthorizeView>
+        <Authorized>
+            <div class="sidebar">
+                <NavMenu />
+            </div>
+
+            <main>
+                <div class="top-row px-4">
+                    <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+                </div>
+
+                <article class="content px-4">
+                    @Body
+                </article>
+            </main>
+        </Authorized>
+        <NotAuthorized>
+            <!-- No sidebar, no navigation links, just the login body -->
+            <article class="unauthorized-container">
+                @Body
+            </article>
+        </NotAuthorized>
+    </AuthorizeView>
+</div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity is not null && user.Identity.IsAuthenticated)
+        {
+            // User is authenticated
+        }
+        else
+        {
+            // User is not authenticated
+        }
+    }
+}
