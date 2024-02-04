@@ -1,0 +1,21 @@
+<--Upload CSV-->
+
+curl --location --request POST 'http://localhost:5217/api/files/csv-upload' \
+--header 'Authorization: Bearer YourAuthTokenHere' \
+--form 'csvFile=@"path_to_your_file.csv"' \
+--form 'Content-Type: multipart/form-data'
+
+<--ListAll CSV-->
+
+
+<--Update CSV-->
+
+curl --location --request PUT 'http://localhost:5217/api/files/csv-update/1' \
+--header 'Authorization: Bearer YourAuthTokenHere' \
+--form 'csvFile=@"path_to_your_file.csv"' \
+--form 'Content-Type: multipart/form-data'
+
+<--Delete CSV-->
+curl --location --request DELETE 'http://localhost:5217/api/files/csv-delete/1' \
+--header 'Authorization: Bearer YourAuthTokenHere'
+

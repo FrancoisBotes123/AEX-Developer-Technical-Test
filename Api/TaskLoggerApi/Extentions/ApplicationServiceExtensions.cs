@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Api.Interfaces;
+using Api.Services;
+using Microsoft.EntityFrameworkCore;
 using TaskLoggerApi.Data;
 using TaskLoggerApi.Interfaces;
 using TaskLoggerApi.Services;
@@ -17,6 +19,9 @@ namespace TaskLoggerApi.Extentions
             services.AddCors();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IVehicleRepository, VehicleService>();
+            services.AddScoped<ICsvRepository, CsvService>();
+
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             return services;

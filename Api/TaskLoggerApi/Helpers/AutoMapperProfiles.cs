@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using Api.Models.CSV;
+using AutoMapper;
 using TaskLoggerApi.Models.User;
 
 namespace TaskLoggerApi.Helpers
@@ -18,6 +19,9 @@ namespace TaskLoggerApi.Helpers
 
             CreateMap<AppUser, UpdateUserDTO>();
             CreateMap<UpdateUserDTO, AppUser>();
+
+            CreateMap<CsvFile, CsvFileDto>();
+            CreateMap<CsvFileDto, CsvFile>();
         }
     }
 }
