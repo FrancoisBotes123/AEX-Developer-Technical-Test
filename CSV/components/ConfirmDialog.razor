@@ -1,0 +1,19 @@
+﻿@inject IModalService Modal
+
+<BlazoredModal Title="Confirmation">
+    <Content>
+        <p>@Message</p>
+    </Content>
+    <Footer>
+        <button @onclick="Confirm" class="btn btn-success">Confirm</button>
+        <button @onclick="Cancel" class="btn btn-danger">Cancel</button>
+    </Footer>
+</BlazoredModal>
+
+@code {
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+    [Parameter] public string Message { get; set; }
+    
+    private void Confirm() => this.BlazoredModal.CloseAsync(ModalResult.Ok(true));
+    private void Cancel() => this.BlazoredModal.CloseAsync(ModalResult.Cancel());
+}

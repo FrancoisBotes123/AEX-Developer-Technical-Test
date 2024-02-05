@@ -70,5 +70,10 @@ namespace Api.Services
                 await _apiDbContext.SaveChangesAsync();
             }
         }
+
+        public async Task<CsvFile> GetCsvFileAsync(int id)
+        {
+            return await _apiDbContext.CsvFiles.FindAsync(id);
+        }
     }
 }

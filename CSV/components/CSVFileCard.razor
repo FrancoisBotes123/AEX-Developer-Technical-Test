@@ -1,0 +1,36 @@
+﻿@using CSV.Models
+
+@using Blazored.Modal.Services
+@inject IModalService ModalService
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">@FileName</h5>
+        <p class="card-text">@UploadedTime.ToString("g")</p>
+        <button @onclick="() => OnEdit.InvokeAsync(Id)" class="btn btn-secondary">Edit</button>
+        <button @onclick="() => ShowDeleteConfirmation()" class="btn btn-danger">Delete</button>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int Id { get; set; }
+    [Parameter] public string FileName { get; set; }
+    [Parameter] public DateTime UploadedTime { get; set; }
+    [Parameter] public EventCallback<int> OnEdit { get; set; }
+    [Parameter] public EventCallback<int> OnDelete { get; set; }
+
+    private async Task ShowDeleteConfirmation()
+    {
+        var parameters = new ModalParameters();
+        parameters.Add("Message", $"Are you sure you want to delete the file '{FileName}'?");
+
+        var modal = ModalService.Show<ConfirmDialog>("Confirm Delete", parameters);
+        var result = await modal.Result;
+
+        if (!result.Cancelled)
+        {
+            await OnDelete.InvokeAsync(Id);
+        }
+    }
+
+}

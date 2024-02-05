@@ -17,7 +17,7 @@ namespace Api.Controllers
             _mapper = mapper;
         }
 
-        [HttpGet]
+        [HttpGet("csv")]
         public async Task<ActionResult<IEnumerable<CsvFileDto>>> GetAllCsvFiles()
         {
             var csvFiles = await _csvRepository.GetAllCsvFilesAsync();
@@ -27,7 +27,19 @@ namespace Api.Controllers
             return Ok(csvFilesToReturn);
         }
 
-        [HttpPost("csv-upload")]
+        [HttpGet("csv/{id}")]
+        public async Task<ActionResult<CsvFileDto>> GetCsvFile(int id)
+        {
+            var csvFile = await _csvRepository.GetCsvFileAsync(id);
+
+            if (csvFile == null) return BadRequest("File does not exist");
+
+            var csvFileToReturn = _mapper.Map<CsvFileDto>(csvFile);
+
+            return Ok(csvFileToReturn);
+        }
+
+        [HttpPost("csv/upload")]
         public async Task<IActionResult> UploadCsvFile([FromForm] IFormFile csvFile)
         {
 
@@ -42,7 +54,7 @@ namespace Api.Controllers
             }
         }
 
-        [HttpPut("csv-update/{id}")]
+        [HttpPut("csv/update/{id}")]
         public async Task<IActionResult> UpdateCsvFile(int id, [FromForm] IFormFile csvFile)
         {
             if (csvFile.Length > 0)
@@ -56,7 +68,7 @@ namespace Api.Controllers
             }
         }
 
-        [HttpDelete("csv-delete/{id}")]
+        [HttpDelete("csv/delete/{id}")]
         public async Task<IActionResult> DeleteCsvFile(int id)
         {
             try

@@ -8,7 +8,7 @@ namespace Api.Interfaces
         Task SaveCsvAsync(IFormFile csvFile);
         Task UpdateCsvAsync(int id, IFormFile csvFile);
         Task DeleteCsvAsync(int id);
-
+        Task<CsvFile> GetCsvFileAsync(int id);
         Task<IEnumerable<CsvFile>> GetAllCsvFilesAsync();
     }
 }

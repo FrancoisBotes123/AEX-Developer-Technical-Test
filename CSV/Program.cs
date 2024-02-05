@@ -1,4 +1,5 @@
 using Blazored.LocalStorage;
+using Blazored.Modal;
 using CSV;
 using CSV.Interfaces;
 using CSV.Services;
@@ -16,7 +17,10 @@ builder.Services.AddOptions();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<AuthenticationStateProvider, ApiAuthenticationStateProvider>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ICSVFileService, CSVFileService>();
+
 builder.Services.AddBlazoredLocalStorage();
+builder.Services.AddBlazoredModal();
 
 
 

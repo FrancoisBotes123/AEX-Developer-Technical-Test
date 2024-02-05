@@ -1,0 +1,50 @@
+﻿
+@using CSV.Interfaces
+@using CSV.Models.CSV
+
+@inject ICSVFileService CSVFileService
+@inject IModalService ModalService
+
+<BlazoredModal>
+    <Content>
+        <EditForm Model="@csvFile" OnValidSubmit="@SaveCSVFile">
+            <div class="mb-3">
+                <label for="fileName" class="form-label">File Name:</label>
+                <InputText id="fileName" class="form-control" @bind-Value="csvFile.FileName" />
+            </div>
+            <div class="mb-3">
+                <label for="uploadTime" class="form-label">Upload Time:</label>
+                <!-- Displaying the date as text since it's not editable -->
+                <p id="uploadTime" class="form-control-plaintext">@csvFile.UploadedTime.ToString("g")</p>
+            </div>
+            <button type="submit" class="btn btn-success">Save</button>
+            <button type="button" class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+        </EditForm>
+    </Content>
+</BlazoredModal>
+
+@code {
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+    [Parameter] public int CsvFileId { get; set; } // Add this line
+
+    private CsvFileDto csvFile = new CsvFileDto();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (CsvFileId != 0) // Assuming 0 means a new CSV file
+        {
+            csvFile = await CSVFileService.GetCSVFileByIdAsync(CsvFileId);
+        }
+    }
+
+    private async Task SaveCSVFile()
+    {
+        await CSVFileService.UpdateCSVFileAsync(csvFile);
+        await BlazoredModal.CloseAsync(ModalResult.Ok(csvFile)); // Close the modal and optionally return the updated CSV file
+    }
+
+    private async Task Cancel()
+    {
+        await BlazoredModal.CloseAsync(); // Just close the modal without saving
+    }
+}

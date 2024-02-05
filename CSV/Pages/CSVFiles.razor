@@ -1,0 +1,61 @@
+﻿@page "/csvfiles"
+@using Blazored.Modal
+@using Blazored.Modal.Services
+@using CSV.Interfaces
+@using CSV.Models.CSV
+@using CSV.components
+
+@inject ICSVFileService CSVFileService
+@inject IModalService ModalService
+
+<h1>CSV Files</h1>
+
+@if (csvFiles == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    foreach (var csvFile in csvFiles)
+    {
+        <CSVFileCard 
+            Id="@csvFile.Id" 
+            FileName="@csvFile.FileName" 
+            UploadedTime="@csvFile.UploadedTime" 
+            OnEdit="EditFile" 
+            OnDelete="DeleteFile" />
+    }
+}
+
+@code {
+    private List<CsvFileDto> csvFiles;
+
+    protected override async Task OnInitializedAsync()
+    {
+        csvFiles = await CSVFileService.GetCSVFilesAsync();
+    }
+
+    private void EditFile(int id)
+    {
+        var parameters = new ModalParameters();
+        parameters.Add(nameof(CSVFileEditModal.CsvFileId), id);
+
+        ModalService.Show<CSVFileEditModal>("Edit CSV File", parameters);
+    }
+
+
+    private async Task DeleteFile(int id)
+    {
+        var parameters = new ModalParameters();
+        parameters.Add("Message", $"Are you sure you want to delete the file?");
+
+        var modal = ModalService.Show<ConfirmDialog>("Confirm Delete", parameters);
+        var result = await modal.Result;
+
+        if (!result.Cancelled)
+        {
+            await CSVFileService.DeleteCSVFileAsync(id);
+            csvFiles.RemoveAll(f => f.Id == id);
+        }
+    }
+}
