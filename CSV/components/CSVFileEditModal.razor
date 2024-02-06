@@ -4,7 +4,53 @@
 
 <style>
     .modal {
-        display: block; /* Hidden by default; you need to add logic to control the display */
+        display: block;
+        position: fixed;
+        z-index: 1050;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+    }
+
+    .modal-dialog {
+        display: flex;
+        flex-direction: column;
+        justify-content: center; /* Centers the modal vertically */
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: auto;
+        margin: auto; /* This will center the modal horizontally */
+        max-width: 80%; /* Set to the desired max-width or percentage */
+        max-height: 80vh; /* Set to the desired max-height */
+        padding: 1rem;
+    }
+
+    .modal-content {
+        position: relative;
+        background-color: #fff;
+        outline: 0;
+        padding: 20px; /* Adjust the padding as needed */
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        overflow-y: auto; /* Allows vertical scrolling */
+        max-height: 70vh; /* Adjust the max-height as needed */
+    }
+
+        /* Ensure your table is styled to be 100% width of its container */
+        .modal-content table {
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+</style>
+
+@* <style>
+    .modal {
+        display: block; /* Shown by default in this example, make sure you control this in your C# code */
         position: fixed;
         z-index: 1050;
         top: 0;
@@ -16,18 +62,38 @@
     }
 
     .modal-dialog {
-        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: center; /* This will vertically center your modal */
+        position: fixed; /* Changed to fixed */
+        top: 0; /* Align to the top */
+        left: 0; /* Align to the left */
+        right: 0; /* Align to the right */
+        bottom: 0; /* Align to the bottom */
         width: auto;
         max-width: 600px;
-        margin: 10% auto;
+        height: auto;
+        margin: auto; /* This will horizontally center your modal, along with top/left/right/bottom */
+        padding: 1rem; /* Added padding around the dialog */
     }
 
     .modal-content {
         position: relative;
         background-color: #fff;
         outline: 0;
+        padding: 20px; /* Padding inside the content, around the table */
+        border-radius: 8px; /* Optional: if you want rounded corners */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional: for a slight shadow effect */
+        overflow: auto; /* In case your table is bigger than the modal */
+        max-height: 80vh; /* You can adjust this value to control the max height of the modal */
     }
-</style>
+
+        /* If you have a specific class for your table, you might want to add some margin */
+        .modal-content table {
+            margin-bottom: 1rem; /* Adjust as needed */
+        }
+</style> *@
+
 <div class="modal">
     <div class="modal-dialog">
         <div class="modal-content">
