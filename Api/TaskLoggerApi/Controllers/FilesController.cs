@@ -28,15 +28,13 @@ namespace Api.Controllers
         }
 
         [HttpGet("csv/{id}")]
-        public async Task<ActionResult<CsvFileDto>> GetCsvFile(int id)
+        public async Task<ActionResult<CsvFile>> GetCsvFile(int id)
         {
             var csvFile = await _csvRepository.GetCsvFileAsync(id);
 
             if (csvFile == null) return BadRequest("File does not exist");
 
-            var csvFileToReturn = _mapper.Map<CsvFileDto>(csvFile);
-
-            return Ok(csvFileToReturn);
+            return Ok(csvFile);
         }
 
         [HttpPost("csv/upload")]

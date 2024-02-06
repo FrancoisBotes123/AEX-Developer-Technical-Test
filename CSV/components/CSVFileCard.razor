@@ -1,22 +1,25 @@
-﻿
-
-@using CSV.Interfaces
+﻿@using CSV.Interfaces
 @using CSV.Models
-@using NetcodeHub.Packages.Components.Modal
-@inject IModalService ModalService
+@using CSV.components
+@using CSV.Models.CSV
+
 @inject IConfirmDialogService ConfirmDialogService
+@inject ICSVFileService CSVFileService
 
 
 <div class="card">
     <div class="card-body">
         <h5 class="card-title">@FileName</h5>
         <p class="card-text">@UploadedTime.ToString("g")</p>
-        <button @onclick="() => ShowEditModal(Id)" class="btn btn-secondary">Edit</button>
+        <button @onclick="() => ShowModal(true)" class="btn btn-secondary">Edit</button>
         <button @onclick="ShowDeleteConfirmation" class="btn btn-danger">Delete</button>
     </div>
 </div>
 
-
+@if (showEditModal)
+{
+    <CSVFileEditModal CsvFile="@csvFile" OnClose="() => ShowModal(false)" />
+}
 
 @code {
     [Parameter] public int Id { get; set; }
@@ -25,18 +28,32 @@
     [Parameter] public EventCallback<int> OnEdit { get; set; }
     [Parameter] public EventCallback<int> OnDelete { get; set; }
 
-    private async void ShowDeleteConfirmation()
+    private CsvFile csvFile = new CsvFile(); // Presumably loaded with actual data somewhere in your code
+    private bool showEditModal = false;
+
+    private async Task ShowDeleteConfirmation()
     {
         bool confirmed = await ConfirmDialogService.ShowDialog("Confirm Delete", "Are you sure you want to delete this item?");
         if (confirmed)
         {
-            // Proceed with the delete operation
+            await OnDelete.InvokeAsync(Id);
         }
     }
 
-    private async Task ShowEditModal(int csvFileId)
+    private async Task ShowModal(bool show)
     {
-        
+        showEditModal = show;
+        if (show)
+        {
+            // Load the CsvFile here if it hasn't been loaded yet
+            csvFile = await LoadCsvFile(Id);
+        }
+        StateHasChanged(); // Refresh the UI to show or hide the modal
     }
 
+    // This method should be implemented to load the CsvFile from your API by Id
+    private async Task<CsvFile> LoadCsvFile(int id)
+    {
+        return await CSVFileService.GetCSVFileByIdAsync(id);
+    }
 }

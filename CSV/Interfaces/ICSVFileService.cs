@@ -7,6 +7,6 @@ namespace CSV.Interfaces
         Task<List<CsvFileDto>> GetCSVFilesAsync();
         Task DeleteCSVFileAsync(int id);
         Task UpdateCSVFileAsync(CsvFileDto csvFile);
-        Task<CsvFileDto> GetCSVFileByIdAsync(int id);
+        Task<CsvFile> GetCSVFileByIdAsync(int id);
     }
 }

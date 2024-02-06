@@ -18,9 +18,9 @@ namespace CSV.Services
             await _httpClient.DeleteAsync($"csv/delete/{id}");
         }
 
-        public async Task<CsvFileDto> GetCSVFileByIdAsync(int id)
+        public async Task<CsvFile> GetCSVFileByIdAsync(int id)
         {
-            var response = await _httpClient.GetFromJsonAsync<CsvFileDto>($"api/files/csv/{id}");
+            var response = await _httpClient.GetFromJsonAsync<CsvFile>($"api/files/csv/{id}");
             if (response != null)
             {
                 return response;
