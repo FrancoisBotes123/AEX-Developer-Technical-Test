@@ -1,0 +1,59 @@
+﻿@using System.Data
+@using CSV.Models.CSV
+@if (IsVisible)
+{
+    <div class="edit-modal">
+        <EditForm Model="@EditableFields" OnValidSubmit="@SaveRowData">
+            @foreach (var field in EditableFields)
+            {
+                <div>
+                    <label>@field.ColumnName</label>
+                    <InputText @bind-Value="@field.Value" />
+                </div>
+            }
+            <button type="submit">Save</button>
+        </EditForm>
+        <button @onclick="Close">Close</button>
+    </div>
+}
+
+@code {
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public EventCallback<bool> IsVisibleChanged { get; set; }
+    [Parameter] public DataRow RowData { get; set; }
+    [Parameter] public EventCallback OnRowUpdated { get; set; }
+
+    public List<EditableField> EditableFields { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        if (RowData != null)
+        {
+            EditableFields = RowData.Table.Columns.Cast<DataColumn>()
+                .Select(col => new EditableField
+                    {
+                        ColumnName = col.ColumnName,
+                        Value = RowData[col]?.ToString()
+                    }).ToList();
+        }
+    }
+
+    private async Task SaveRowData()
+    {
+        // Map the values back to the DataRow and handle type conversions
+        foreach (var field in EditableFields)
+        {
+            DataColumn column = RowData.Table.Columns[field.ColumnName];
+            RowData[column] = Convert.ChangeType(field.Value, column.DataType);
+        }
+
+        await OnRowUpdated.InvokeAsync(null); // Invoke the callback to notify the parent component
+        Close();
+    }
+
+    private void Close()
+    {
+        IsVisible = false;
+        IsVisibleChanged.InvokeAsync(IsVisible);
+    }
+}

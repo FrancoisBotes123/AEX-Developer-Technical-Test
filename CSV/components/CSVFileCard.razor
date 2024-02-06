@@ -2,34 +2,39 @@
 @using CSV.Models
 @using CSV.components
 @using CSV.Models.CSV
+@using System.Text
+@using System.Data
 
 @inject IConfirmDialogService ConfirmDialogService
 @inject ICSVFileService CSVFileService
-
 
 <div class="card">
     <div class="card-body">
         <h5 class="card-title">@FileName</h5>
         <p class="card-text">@UploadedTime.ToString("g")</p>
-        <button @onclick="() => ShowModal(true)" class="btn btn-secondary">Edit</button>
+        <button @onclick="ShowViewFile" class="btn btn-secondary">View</button>
         <button @onclick="ShowDeleteConfirmation" class="btn btn-danger">Delete</button>
     </div>
 </div>
 
-@if (showEditModal)
+@if (showViewModal)
 {
-    <CSVFileEditModal CsvFile="@csvFile" OnClose="() => ShowModal(false)" />
+    <ViewFileModal IsVisible="@showViewModal" CsvFileId="@Id" IsVisibleChanged="HideViewFileModal" />
 }
+
+
 
 @code {
     [Parameter] public int Id { get; set; }
     [Parameter] public string FileName { get; set; }
     [Parameter] public DateTime UploadedTime { get; set; }
-    [Parameter] public EventCallback<int> OnEdit { get; set; }
+    [Parameter] public EventCallback<int> OnView { get; set; }
     [Parameter] public EventCallback<int> OnDelete { get; set; }
 
-    private CsvFile csvFile = new CsvFile(); // Presumably loaded with actual data somewhere in your code
-    private bool showEditModal = false;
+
+    private bool showViewModal = false;
+    private List<string> columnNames = new List<string>();
+    private List<List<string>> rows = new List<List<string>>();
 
     private async Task ShowDeleteConfirmation()
     {
@@ -40,20 +45,59 @@
         }
     }
 
-    private async Task ShowModal(bool show)
+    private void HideViewFileModal(bool isVisible)
     {
-        showEditModal = show;
-        if (show)
-        {
-            // Load the CsvFile here if it hasn't been loaded yet
-            csvFile = await LoadCsvFile(Id);
-        }
-        StateHasChanged(); // Refresh the UI to show or hide the modal
+        showViewModal = isVisible;
+    }
+    private async Task ShowViewFile()
+    {
+        await OnView.InvokeAsync(Id);
+    }
+    
+    /*private async Task ShowViewFile()
+    {
+        var csvData = await LoadCsvData(Id);
+        columnNames = csvData.Item1;
+        rows = csvData.Item2;
+        showViewModal = true;
+    }*/
+
+    private async Task<(List<string>, List<List<string>>)> LoadCsvData(int id)
+    {
+        // This is a simplified example; you will need to adjust this to your actual data structure
+        var csvFile = await CSVFileService.GetCSVFileByIdAsync(id);
+
+        // Assuming you have a method to parse the CSV file into column names and rows
+        var parsedCsvData = ParseCsv(csvFile.Content);
+
+        return parsedCsvData;
     }
 
-    // This method should be implemented to load the CsvFile from your API by Id
-    private async Task<CsvFile> LoadCsvFile(int id)
+    private (List<string>, List<List<string>>) ParseCsv(byte[] csvContent)
     {
-        return await CSVFileService.GetCSVFileByIdAsync(id);
+        var result = (ColumnNames: new List<string>(), Rows: new List<List<string>>());
+        var csvString = Encoding.UTF8.GetString(csvContent);
+
+        using (var reader = new StringReader(csvString))
+        {
+            string line;
+            bool isFirstLine = true;
+            while ((line = reader.ReadLine()) != null)
+            {
+                var values = line.Split(',');
+                if (isFirstLine)
+                {
+                    result.ColumnNames.AddRange(values);
+                    isFirstLine = false;
+                }
+                else
+                {
+                    result.Rows.Add(new List<string>(values));
+                }
+            }
+        }
+
+        return result;
     }
+
 }

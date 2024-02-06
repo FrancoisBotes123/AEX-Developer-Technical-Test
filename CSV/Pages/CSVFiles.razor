@@ -6,57 +6,76 @@
 @using CSV.components
 
 @inject ICSVFileService CSVFileService
-@inject IModalService ModalService
 
-<h1>CSV Files</h1>
 
-@if (csvFiles == null)
+
+@if (!showViewModal)
 {
-    <p>Loading...</p>
-}
-else
-{
-    foreach (var csvFile in csvFiles)
+    <h1>CSV Files</h1>
+    // Only show the CSV file list if showViewModal is false
+    if (csvFiles == null)
     {
-        <CSVFileCard 
-            Id="@csvFile.Id" 
-            FileName="@csvFile.FileName" 
-            UploadedTime="@csvFile.UploadedTime"
-            OnEdit="(() => EditFile(csvFile.Id))"
-            OnDelete="(() => DeleteFile(csvFile.Id))" />
+        <p>Loading...</p>
     }
-
-
-
+    else
+    {
+        foreach (var csvFile in csvFiles)
+        {
+            <CSVFileCard Id="@csvFile.Id"
+                         FileName="@csvFile.FileName"
+                         UploadedTime="@csvFile.UploadedTime"
+                         OnView="(() => ShowViewFile(csvFile.Id))"
+                         OnDelete="(() => DeleteFile(csvFile.Id))" />
+        }
+    }
 }
+
+@if (showViewModal)
+{
+    // Show the ViewFileModal when a file is being viewed
+    <ViewFileModal CsvFileId="@selectedCsvFileId" IsVisible="@showViewModal" IsVisibleChanged="HideViewFileModal" />
+}
+
+
 
 @code {
-    [CascadingParameter] public IModalService Modal { get; set; } = default!;
     private List<CsvFileDto> csvFiles;
+    private bool showViewModal = false;
+    private int selectedCsvFileId;
 
     protected override async Task OnInitializedAsync()
     {
         csvFiles = await CSVFileService.GetCSVFilesAsync();
     }
 
+    private void ShowViewFile(int id)
+    {
+        selectedCsvFileId = id; // Set the ID of the selected file
+        showViewModal = true;   // Show the modal
+    }
+
     private void EditFile(int id)
     {
     }
-
+    private void HideViewFileModal(bool isVisible)
+    {
+        showViewModal = !isVisible; // Hide the modal and show the CSV file list
+        StateHasChanged(); // Re-render the component
+    }
 
     private async Task DeleteFile(int id)
     {
-       /* var parameters = new ModalParameters();
-         parameters.Add("Message", $"Are you sure you want to delete the file?");
+        /* var parameters = new ModalParameters();
+          parameters.Add("Message", $"Are you sure you want to delete the file?");
 
-         var modal = Modal.Show<ConfirmDialog>("Confirm Delete", parameters);
-         var result = await modal.Result;
+          var modal = Modal.Show<ConfirmDialog>("Confirm Delete", parameters);
+          var result = await modal.Result;
 
-         if (!result.Cancelled)
-         {
-             await CSVFileService.DeleteCSVFileAsync(id);
-             csvFiles.RemoveAll(f => f.Id == id);
-         }
-         */
+          if (!result.Cancelled)
+          {
+              await CSVFileService.DeleteCSVFileAsync(id);
+              csvFiles.RemoveAll(f => f.Id == id);
+          }
+          */
     }
 }

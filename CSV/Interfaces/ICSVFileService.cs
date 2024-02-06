@@ -1,4 +1,5 @@
 ﻿using CSV.Models.CSV;
+using System.Data;
 
 namespace CSV.Interfaces
 {
@@ -6,7 +7,7 @@ namespace CSV.Interfaces
     {
         Task<List<CsvFileDto>> GetCSVFilesAsync();
         Task DeleteCSVFileAsync(int id);
-        Task UpdateCSVFileAsync(CsvFileDto csvFile);
+        Task<bool> UpdateCSVFileAsync(int id, DataTable dataTable);
         Task<CsvFile> GetCSVFileByIdAsync(int id);
     }
 }

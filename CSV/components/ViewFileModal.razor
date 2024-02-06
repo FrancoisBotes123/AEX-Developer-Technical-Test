@@ -1,0 +1,125 @@
+﻿@using System.Data
+@using CSV.Interfaces
+@using Microsoft.VisualBasic.FileIO
+@using System.Text
+@inject ICSVFileService CSVFileService
+
+@if (IsVisible)
+{
+    <Modal IsVisible="@IsVisible" IsVisibleChanged="@((newValue) => IsVisible = newValue)">
+        <div>
+            <h3>View CSV File</h3>
+            @if (CsvContent != null)
+            {
+                <table class="table">
+                    <thead>
+                        <tr>
+                            @foreach (var header in Headers)
+                            {
+                                <th>@header</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in CsvContent.Rows.Cast<DataRow>())
+                        {
+                            <tr>
+                                @foreach (var cell in row.ItemArray)
+                                {
+                                    <td>@cell.ToString()</td>
+                                }
+                                <td>
+                                    <button class="btn btn-primary" @onclick="@(() => EditRow(row))">Edit</button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p>Loading CSV content...</p>
+            }
+        </div>
+    </Modal>
+
+    @if (showEditModal)
+    {
+        <EditRowModal RowData="@editableRow" IsVisible="@showEditModal" IsVisibleChanged="OnEditModalVisibilityChanged" />
+    }
+}
+
+@code {
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public EventCallback<bool> IsVisibleChanged { get; set; }
+    [Parameter] public int CsvFileId { get; set; }
+    private bool showEditModal = false;
+    private DataRow editableRow;
+    public DataTable CsvContent { get; set; }
+    public List<string> Headers { get; set; }
+
+    // Load the CSV content from the file when the modal becomes visible
+    protected override async Task OnParametersSetAsync()
+    {
+        if (IsVisible && CsvContent == null)
+        {
+            var csvFile = await CSVFileService.GetCSVFileByIdAsync(CsvFileId);
+            CsvContent = ConvertCsvToDataTable(csvFile.Content);
+            Headers = CsvContent.Columns.Cast<DataColumn>().Select(col => col.ColumnName).ToList();
+        }
+    }
+    private void OnEditModalVisibilityChanged(bool isVisible)
+    {
+        showEditModal = isVisible;
+        if (!isVisible)
+        {
+            // Optionally, update the DataTable or refresh the data
+        }
+    }
+    private DataTable ConvertCsvToDataTable(byte[] csvBytes)
+    {
+        var csvData = Encoding.UTF8.GetString(csvBytes);
+        using var csvReader = new StringReader(csvData);
+        using var parser = new TextFieldParser(csvReader);
+        parser.SetDelimiters(new string[] { "," });
+        parser.HasFieldsEnclosedInQuotes = true;
+
+        DataTable dt = new DataTable();
+        string[] colFields = parser.ReadFields();
+
+        foreach (string column in colFields)
+        {
+            DataColumn datecolumn = new DataColumn(column);
+            datecolumn.AllowDBNull = true;
+            dt.Columns.Add(datecolumn);
+        }
+
+        while (!parser.EndOfData)
+        {
+            string[] fieldData = parser.ReadFields();
+            // Making empty value as null
+            for (int i = 0; i < fieldData.Length; i++)
+            {
+                if (fieldData[i] == "")
+                {
+                    fieldData[i] = null;
+                }
+            }
+            dt.Rows.Add(fieldData);
+        }
+
+        return dt;
+    }
+
+    private void EditRow(DataRow row)
+    {
+        editableRow = row;
+        showEditModal = true;
+    }
+
+    private void CloseModal()
+    {
+        IsVisible = false;
+        IsVisibleChanged.InvokeAsync(IsVisible);
+    }
+}
