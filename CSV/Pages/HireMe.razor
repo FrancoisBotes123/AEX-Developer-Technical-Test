@@ -1,0 +1,38 @@
+﻿@page "/hireme"
+
+<style>
+    .hire-me-container {
+        text-align: center;
+        position: relative;
+        height: 300px; /* Adjust as needed */
+    }
+
+    .btn-yes,
+    .btn-no {
+        margin: 10px;
+        padding: 5px 15px;
+    }
+</style>
+<div class="hire-me-container">
+    <h3>DO YOU WANT TO HIRE ME</h3>
+    <button class="btn btn-primary btn-yes" @onclick="SayYes">yes</button>
+    <button class="btn btn-danger btn-no" @onmouseover="MoveButton" style="@noButtonStyle">no</button>
+    <div>
+        @message
+    </div>
+</div>
+
+@code {
+    private string message = "";
+    private string noButtonStyle = "";
+
+    private void SayYes()
+    {
+        message = "Cool, I will start packing my bags";
+    }
+
+    private void MoveButton()
+    {
+        noButtonStyle = $"position: absolute; top: {new Random().Next(100, 500)}px; left: {new Random().Next(100, 500)}px;";
+    }
+}
