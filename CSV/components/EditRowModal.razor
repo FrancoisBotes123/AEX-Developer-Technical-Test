@@ -1,5 +1,29 @@
 ﻿@using System.Data
 @using CSV.Models.CSV
+
+<style>
+    .edit-modal {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        padding: 20px;
+        z-index: 1000; /* Ensure it's above other content */
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    .modal-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5); /* semi-transparent black background */
+        z-index: 999; /* Just under the modal */
+    }
+</style>
 @if (IsVisible)
 {
     <div class="edit-modal">
@@ -11,9 +35,10 @@
                     <InputText @bind-Value="@field.Value" />
                 </div>
             }
-            <button type="submit">Save</button>
+            <button class="btn btn-primary" type="submit">Save</button>
+            <button class="btn btn-outline-danger" @onclick="Close">Close</button>
         </EditForm>
-        <button @onclick="Close">Close</button>
+        
     </div>
 }
 

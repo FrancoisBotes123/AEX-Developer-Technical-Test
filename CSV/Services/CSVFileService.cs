@@ -2,6 +2,7 @@
 using CSV.Models.CSV;
 using System.Data;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
 
@@ -35,13 +36,26 @@ namespace CSV.Services
         {
             // Convert DataTable to CSV string
             var csvContent = ConvertDataTableToCsv(dataTable);
-            using var stringContent = new StringContent(csvContent);
-            using var formData = new MultipartFormDataContent();
-            formData.Add(stringContent, "csvFile");
+            // Convert the CSV string to a Stream
+            var csvStream = new MemoryStream(Encoding.UTF8.GetBytes(csvContent));
+            // Create a StreamContent for the file upload
+            using var fileContent = new StreamContent(csvStream);
+            fileContent.Headers.ContentType = new MediaTypeHeaderValue("text/csv");
+            fileContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data")
+            {
+                Name = "csvFile",
+                FileName = $"updated_{id}.csv"
+            };
 
+            // Create MultipartFormDataContent and add the file content
+            using var formData = new MultipartFormDataContent();
+            formData.Add(fileContent, "csvFile", $"updated_{id}.csv");
+
+            // Send the request to the server endpoint
             var response = await _httpClient.PutAsync($"api/files/csv/update/{id}", formData);
             return response.IsSuccessStatusCode;
         }
+
 
         public async Task<List<CsvFileDto>> GetCSVFilesAsync()
         {

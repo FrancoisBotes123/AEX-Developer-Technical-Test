@@ -32,8 +32,7 @@
 
 @if (showViewModal)
 {
-    // Show the ViewFileModal when a file is being viewed
-    <ViewFileModal CsvFileId="@selectedCsvFileId" IsVisible="@showViewModal" IsVisibleChanged="HideViewFileModal" />
+    <ViewFileModal CsvFileId="@selectedCsvFileId" IsVisible="@showViewModal" IsVisibleChanged="HideViewFileModal" OnSave="RefreshFileList" />
 }
 
 
@@ -62,7 +61,12 @@
         showViewModal = !isVisible; // Hide the modal and show the CSV file list
         StateHasChanged(); // Re-render the component
     }
-
+    private async Task RefreshFileList()
+    {
+        csvFiles = await CSVFileService.GetCSVFilesAsync();
+        showViewModal = false; // Hide the ViewFileModal
+        StateHasChanged(); // Update the UI to show the list of files
+    }
     private async Task DeleteFile(int id)
     {
         /* var parameters = new ModalParameters();

@@ -35,6 +35,7 @@
                         }
                     </tbody>
                 </table>
+                <button class="btn btn-success" @onclick="SaveFile">Save</button>
             }
             else
             {
@@ -53,6 +54,7 @@
     [Parameter] public bool IsVisible { get; set; }
     [Parameter] public EventCallback<bool> IsVisibleChanged { get; set; }
     [Parameter] public int CsvFileId { get; set; }
+    [Parameter] public EventCallback OnSave { get; set; }
     private bool showEditModal = false;
     private DataRow editableRow;
     public DataTable CsvContent { get; set; }
@@ -110,7 +112,40 @@
 
         return dt;
     }
+    private async Task SaveFile()
+    {
+        // Call the service to update the file
+        var success = await CSVFileService.UpdateCSVFileAsync(CsvFileId, CsvContent);
 
+        if (success)
+        {
+            // Hide the modal
+            IsVisible = false;
+            IsVisibleChanged.InvokeAsync(false);
+
+            // Notify the parent component that the file has been saved
+            await OnSave.InvokeAsync();
+        }
+        else
+        {
+            // Handle the case where the file update was not successful
+        }
+    }
+
+
+    /*private async Task SaveFile()
+    {
+
+        // Call the service to update the file, assume a method like this exists
+        await CSVFileService.UpdateCSVFileAsync(CsvFileId, CsvContent);
+
+        // Hide the modal and refresh the file list
+        IsVisible = false;
+        IsVisibleChanged.InvokeAsync(false);
+        showEditModal = false;
+        StateHasChanged();
+        await CSVFileService.GetCSVFilesAsync(); // Refresh the list
+    }*/
     private void EditRow(DataRow row)
     {
         editableRow = row;
@@ -121,5 +156,6 @@
     {
         IsVisible = false;
         IsVisibleChanged.InvokeAsync(IsVisible);
+        StateHasChanged();
     }
 }
