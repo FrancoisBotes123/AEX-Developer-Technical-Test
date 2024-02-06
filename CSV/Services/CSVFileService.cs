@@ -80,5 +80,29 @@ namespace CSV.Services
 
             return sb.ToString();
         }
+
+        public async Task<bool> UploadCSVFileAsync(string fileName,DataTable dataTable)
+        {
+            // Convert DataTable to CSV string
+            var csvContent = ConvertDataTableToCsv(dataTable);
+            // Convert the CSV string to a Stream
+            var csvStream = new MemoryStream(Encoding.UTF8.GetBytes(csvContent));
+            // Create a StreamContent for the file upload
+            using var fileContent = new StreamContent(csvStream);
+            fileContent.Headers.ContentType = new MediaTypeHeaderValue("text/csv");
+            fileContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data")
+            {
+                Name = "csvFile",
+                FileName = $"{fileName}.csv" // Since this is a new file, you can set a default name or generate one dynamically
+            };
+
+            // Create MultipartFormDataContent and add the file content
+            using var formData = new MultipartFormDataContent();
+            formData.Add(fileContent, "csvFile", $"{fileName}.csv");
+
+            // Send the request to the server endpoint
+            var response = await _httpClient.PostAsync("api/files/csv/upload", formData);
+            return response.IsSuccessStatusCode;
+        }
     }
 }

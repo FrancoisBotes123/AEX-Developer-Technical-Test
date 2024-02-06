@@ -4,6 +4,7 @@
 @using CSV.Interfaces
 @using CSV.Models.CSV
 @using CSV.components
+@using System.Data
 
 @inject ICSVFileService CSVFileService
 
@@ -19,6 +20,13 @@
     }
     else
     {
+        <div style="align-content:end">
+            <label for="fileInput" class="btn btn-primary">Add New File</label>
+            <InputFile id="fileInput" OnChange="@OnInputFileChange" style="display:none" />
+
+
+        </div>
+
         foreach (var csvFile in csvFiles)
         {
             <CSVFileCard Id="@csvFile.Id"
@@ -41,10 +49,48 @@
     private List<CsvFileDto> csvFiles;
     private bool showViewModal = false;
     private int selectedCsvFileId;
-
+    private ElementReference inputFileRef;
     protected override async Task OnInitializedAsync()
     {
         csvFiles = await CSVFileService.GetCSVFilesAsync();
+    }
+    private async Task OnInputFileChange(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+            // Ensure it's a CSV file
+            if (file.ContentType == "text/csv" || file.Name.EndsWith(".csv"))
+            {
+                // Read the file content into a stream
+                using var stream = new MemoryStream();
+                await file.OpenReadStream().CopyToAsync(stream);
+
+                // Make sure we're at the start of the stream for reading
+                stream.Position = 0;
+
+                // Convert the stream to a DataTable or byte array as needed
+                // This assumes you have a method to convert the stream to a DataTable
+                var dataTable = ConvertStreamToDataTable(stream);
+
+                // Call the service to upload the file
+                var result = await CSVFileService.UploadCSVFileAsync(file.Name,dataTable);
+
+                if (result)
+                {
+                    // Refresh the file list to include the newly uploaded file
+                    await RefreshFileList();
+                }
+                else
+                {
+                    // Handle the failure scenario
+                }
+            }
+            else
+            {
+                // Inform the user they can only upload CSV files
+            }
+        }
     }
 
     private void ShowViewFile(int id)
@@ -69,17 +115,34 @@
     }
     private async Task DeleteFile(int id)
     {
-        /* var parameters = new ModalParameters();
-          parameters.Add("Message", $"Are you sure you want to delete the file?");
-
-          var modal = Modal.Show<ConfirmDialog>("Confirm Delete", parameters);
-          var result = await modal.Result;
-
-          if (!result.Cancelled)
-          {
-              await CSVFileService.DeleteCSVFileAsync(id);
-              csvFiles.RemoveAll(f => f.Id == id);
-          }
-          */
+        await CSVFileService.DeleteCSVFileAsync(id);
+        RefreshFileList();
     }
+    private DataTable ConvertStreamToDataTable(Stream stream)
+    {
+        DataTable dataTable = new DataTable();
+        stream.Position = 0; // Reset stream position to the beginning
+
+        using (var reader = new StreamReader(stream))
+        {
+            // Read the first line to create the DataTable columns
+            var headers = reader.ReadLine().Split(',');
+            foreach (var header in headers)
+            {
+                dataTable.Columns.Add(header);
+            }
+
+            // Read the remaining lines to add rows to the DataTable
+            while (!reader.EndOfStream)
+            {
+                var fields = reader.ReadLine().Split(',');
+                DataRow dataRow = dataTable.NewRow();
+                dataRow.ItemArray = fields;
+                dataTable.Rows.Add(dataRow);
+            }
+        }
+
+        return dataTable;
+    }
+
 }
