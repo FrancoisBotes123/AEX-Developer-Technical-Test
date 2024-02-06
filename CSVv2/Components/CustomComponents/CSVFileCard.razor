@@ -1,10 +1,5 @@
-﻿
-
-@using CSV.Interfaces
-@using CSV.Models
+﻿@using CSVv2.Models
 @using NetcodeHub.Packages.Components.Modal
-@inject IModalService ModalService
-@inject IConfirmDialogService ConfirmDialogService
 
 
 <div class="card">
@@ -12,10 +7,16 @@
         <h5 class="card-title">@FileName</h5>
         <p class="card-text">@UploadedTime.ToString("g")</p>
         <button @onclick="() => ShowEditModal(Id)" class="btn btn-secondary">Edit</button>
-        <button @onclick="ShowDeleteConfirmation" class="btn btn-danger">Delete</button>
+        <button @onclick="(() =>ShowDeleteConfirmation(Id))" class="btn btn-danger">Delete</button>
     </div>
 </div>
 
+<Confirmation
+    @ref="confirmation"
+    Instruction="@instruction"
+    Action="Action"
+    BoostrapClass="border-danger"
+    CustomStyle="width:300px"/>
 
 
 @code {
@@ -25,13 +26,17 @@
     [Parameter] public EventCallback<int> OnEdit { get; set; }
     [Parameter] public EventCallback<int> OnDelete { get; set; }
 
-    private async void ShowDeleteConfirmation()
+    Confirmation? confirmation;
+    public string? instruction { get; set; } = "Are you sure you want to delete the file?";
+
+    void Action()
     {
-        bool confirmed = await ConfirmDialogService.ShowDialog("Confirm Delete", "Are you sure you want to delete this item?");
-        if (confirmed)
-        {
-            // Proceed with the delete operation
-        }
+
+    }
+
+    private async void ShowDeleteConfirmation(int csvFileId)
+    {
+        await confirmation.Show();
     }
 
     private async Task ShowEditModal(int csvFileId)

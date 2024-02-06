@@ -1,19 +1,73 @@
-﻿@inject IModalService Modal
+﻿@using CSV.Interfaces
+@inject IConfirmDialogService ConfirmDialogService
 
-<BlazoredModal Title="Confirmation">
-    <Content>
-        <p>@Message</p>
-    </Content>
-    <Footer>
-        <button @onclick="Confirm" class="btn btn-success">Confirm</button>
-        <button @onclick="Cancel" class="btn btn-danger">Cancel</button>
-    </Footer>
-</BlazoredModal>
+<style>
+    .confirm-dialog-overlay {
+        position: fixed; /* or absolute */
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent backdrop */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000; /* Ensure it's above other content */
+    }
+
+    .confirm-dialog {
+        background-color: white;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        z-index: 1001; /* Above the backdrop */
+    }
+</style>
+
+@if (IsVisible)
+{
+    <div class="confirm-dialog-overlay">
+        <div class="confirm-dialog">
+            <h2>@Title</h2>
+            <p>@Message</p>
+            <button @onclick="Confirm" class="btn btn-outline-primary">Yes</button>
+            <button @onclick="Cancel" class="btn btn-danger">No</button>
+        </div>
+    </div>
+}
 
 @code {
-    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
-    [Parameter] public string Message { get; set; }
-    
-    private void Confirm() => this.BlazoredModal.CloseAsync(ModalResult.Ok(true));
-    private void Cancel() => this.BlazoredModal.CloseAsync(ModalResult.Cancel());
+    private bool IsVisible { get; set; }
+    private string Title { get; set; }
+    private string Message { get; set; }
+    private TaskCompletionSource<bool> ConfirmTask { get; set; }
+
+    protected override void OnInitialized()
+    {
+        ConfirmDialogService.Register(this);
+    }
+
+    public Task<bool> Show(string title, string message)
+    {
+        Title = title;
+        Message = message;
+        IsVisible = true;
+        ConfirmTask = new TaskCompletionSource<bool>();
+        StateHasChanged();
+        return ConfirmTask.Task;
+    }
+
+    private void Confirm()
+    {
+        IsVisible = false;
+        ConfirmTask.SetResult(true);
+        StateHasChanged();
+    }
+
+    private void Cancel()
+    {
+        IsVisible = false;
+        ConfirmTask.SetResult(false);
+        StateHasChanged();
+    }
 }

@@ -1,12 +1,9 @@
 ﻿@page "/csvfiles"
-@using Blazored.Modal
-@using Blazored.Modal.Services
-@using CSV.Interfaces
-@using CSV.Models.CSV
-@using CSV.components
+@using CSVv2.Interfaces
+@using CSVv2.Models.CSV
+@using CSVv2.Components.CustomComponents
 
 @inject ICSVFileService CSVFileService
-@inject IModalService ModalService
 
 <h1>CSV Files</h1>
 
@@ -26,12 +23,9 @@ else
             OnDelete="(() => DeleteFile(csvFile.Id))" />
     }
 
-
-
 }
 
 @code {
-    [CascadingParameter] public IModalService Modal { get; set; } = default!;
     private List<CsvFileDto> csvFiles;
 
     protected override async Task OnInitializedAsync()
@@ -41,10 +35,7 @@ else
 
     private void EditFile(int id)
     {
-        var parameters = new ModalParameters();
-        parameters.Add(nameof(CSVFileEditModal.CsvFileId), id);
-
-        Modal.Show<CSVFileEditModal>("Edit CSV File", parameters);
+        
     }
 
 

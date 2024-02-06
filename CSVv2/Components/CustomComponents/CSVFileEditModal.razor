@@ -1,14 +1,10 @@
-﻿
-@using CSV.Interfaces
-@using CSV.Models.CSV
+﻿@using CSVv2.Interfaces
+@using CSVv2.Models.CSV
 
-@using Blazored.Modal
-@using Blazored.Modal.Services
 
 @inject ICSVFileService CSVFileService
-@inject IModalService ModalService
 
-<BlazoredModal>
+
         <EditForm Model="@csvFile" OnValidSubmit="@SaveCSVFile">
             <div class="mb-3">
                 <label for="fileName" class="form-label">File Name:</label>
@@ -22,10 +18,9 @@
             <button type="submit" class="btn btn-success">Save</button>
             <button type="button" class="btn btn-secondary" @onclick="Cancel">Cancel</button>
         </EditForm>
-</BlazoredModal>
+
 
 @code {
-    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
     [Parameter] public int CsvFileId { get; set; } // Add this line
 
     private CsvFileDto csvFile = new CsvFileDto();

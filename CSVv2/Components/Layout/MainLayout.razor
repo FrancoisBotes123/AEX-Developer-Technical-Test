@@ -1,7 +1,8 @@
-﻿@using CSV.components
-@using Microsoft.AspNetCore.Components.Authorization
+﻿@using Microsoft.AspNetCore.Components.Authorization
 @inherits LayoutComponentBase
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IJSRuntime JSRuntime
+
 
 <style>
     .unauthorized-container {
@@ -35,7 +36,6 @@
 
                 <article class="content px-4">
                         @Body
-                    <ConfirmDialog />
                 </article>
 
             </main>
@@ -50,18 +50,37 @@
 </div>
 
 @code {
-    protected override async Task OnInitializedAsync()
+    private bool isAuthenticationChecked = false;
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
+        if (firstRender)
+        {
+            try
+            {
+                // Example of a safe check or operation
+                var isClientSide = await JSRuntime.InvokeAsync<bool>("isClientSide");
+                if (isClientSide)
+                {
+                    var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+                    var user = authState.User;
 
-        if (user.Identity is not null && user.Identity.IsAuthenticated)
-        {
-            // User is authenticated
-        }
-        else
-        {
-            // User is not authenticated
+                    if (user.Identity is not null && user.Identity.IsAuthenticated)
+                    {
+                        // User is authenticated
+                    }
+                    else
+                    {
+                        // User is not authenticated
+                    }
+                    isAuthenticationChecked = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle or log the exception as needed
+            }
         }
     }
+  
 }
+
